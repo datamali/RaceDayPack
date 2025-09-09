@@ -22,6 +22,8 @@ class RaceDayPack {
         
         // Check if Firebase is available and configured
         if (typeof dbService !== 'undefined' && this.isFirebaseConfigured()) {
+            // Show auth page immediately if Firebase is configured
+            this.showPage('auth-page');
             // Initialize Firebase authentication listener
             dbService.initAuth((user) => {
                 this.handleAuthStateChange(user);
@@ -114,7 +116,71 @@ class RaceDayPack {
         }
     }
 
+    setupAuthEventListeners() {
+        console.log('Setting up auth event listeners');
+        // Sign in form
+        const signinForm = document.getElementById('signin');
+        if (signinForm) {
+            console.log('Found signin form, adding listener');
+            signinForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSignIn();
+            });
+        } else {
+            console.log('Signin form not found');
+        }
+
+        // Sign up form
+        const signupForm = document.getElementById('signup');
+        if (signupForm) {
+            console.log('Found signup form, adding listener');
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSignUp();
+            });
+        } else {
+            console.log('Signup form not found');
+        }
+
+        // Google sign in
+        const googleSigninBtn = document.getElementById('google-signin');
+        if (googleSigninBtn) {
+            googleSigninBtn.addEventListener('click', () => {
+                this.handleGoogleSignIn();
+            });
+        }
+
+        // Google sign up (same as sign in)
+        const googleSignupBtn = document.getElementById('google-signup');
+        if (googleSignupBtn) {
+            googleSignupBtn.addEventListener('click', () => {
+                this.handleGoogleSignIn();
+            });
+        }
+
+        // Switch to sign up form
+        const showSignupLink = document.getElementById('show-signup');
+        if (showSignupLink) {
+            showSignupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchAuthForm('signup');
+            });
+        }
+
+        // Switch to sign in form
+        const showSigninLink = document.getElementById('show-signin');
+        if (showSigninLink) {
+            showSigninLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchAuthForm('signin');
+            });
+        }
+    }
+
     setupEventListeners() {
+        // Authentication event listeners
+        this.setupAuthEventListeners();
+        
         // Landing page
         document.getElementById('quick-start').addEventListener('click', () => {
             this.showPage('race-setup-page');
@@ -654,6 +720,86 @@ class RaceDayPack {
         const saved = localStorage.getItem('raceDayPackData');
         if (saved) {
             this.userData = { ...this.userData, ...JSON.parse(saved) };
+        }
+    }
+
+    // Authentication methods
+    async handleSignIn() {
+        if (typeof dbService === 'undefined') {
+            alert('Authentication service not available');
+            return;
+        }
+
+        const email = document.getElementById('signin-email').value;
+        const password = document.getElementById('signin-password').value;
+
+        try {
+            await dbService.signIn(email, password);
+            // handleAuthStateChange will be called automatically
+        } catch (error) {
+            console.error('Sign in error:', error);
+            alert('Sign in failed: ' + error.message);
+        }
+    }
+
+    async handleSignUp() {
+        console.log('HandleSignUp called');
+        if (typeof dbService === 'undefined') {
+            alert('Authentication service not available');
+            return;
+        }
+
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm').value;
+
+        console.log('Signup data:', { name, email, password: '***' });
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
+
+        try {
+            await dbService.signUp(email, password, name);
+            // handleAuthStateChange will be called automatically
+        } catch (error) {
+            console.error('Sign up error:', error);
+            alert('Sign up failed: ' + error.message);
+        }
+    }
+
+    async handleGoogleSignIn() {
+        if (typeof dbService === 'undefined') {
+            alert('Authentication service not available');
+            return;
+        }
+
+        try {
+            await dbService.signInWithGoogle();
+            // handleAuthStateChange will be called automatically
+        } catch (error) {
+            console.error('Google sign in error:', error);
+            alert('Google sign in failed: ' + error.message);
+        }
+    }
+
+    switchAuthForm(formType) {
+        const signinForm = document.getElementById('signin-form');
+        const signupForm = document.getElementById('signup-form');
+
+        if (formType === 'signup') {
+            signinForm.classList.remove('active');
+            signupForm.classList.add('active');
+        } else {
+            signupForm.classList.remove('active');
+            signinForm.classList.add('active');
         }
     }
 }
