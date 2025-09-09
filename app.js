@@ -28,7 +28,6 @@ class RaceDayPack {
             });
         } else {
             // Firebase not configured, start in offline mode
-            console.log('Firebase not configured, starting in offline mode');
             this.isOfflineMode = true;
             this.loadUserData();
             this.showPage('landing-page');
@@ -180,8 +179,11 @@ class RaceDayPack {
         });
         
         // Show selected page
-        document.getElementById(pageId).classList.add('active');
-        this.currentPage = pageId;
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
+            this.currentPage = pageId;
+        }
     }
 
     handleOnboardingNext() {

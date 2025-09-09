@@ -6,53 +6,98 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: "UberMove", "UberMoveText", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
-    color: #1a202c;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #000000;
+    background: #000000;
     min-height: 100vh;
+    font-size: 16px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Design Tokens */
+/* Design Tokens - Uber-inspired */
 :root {
-    --primary-color: #3182ce;
-    --primary-hover: #2c5aa0;
-    --secondary-color: #718096;
-    --accent-color: #ed8936;
-    --accent-hover: #dd7324;
-    --success-color: #48bb78;
-    --warning-color: #ed8936;
-    --error-color: #f56565;
+    --primary-color: #000000;
+    --primary-hover: #333333;
+    --secondary-color: #276ef1;
+    --secondary-hover: #1e5ce6;
+    --accent-color: #06c270;
+    --accent-hover: #05a55c;
+    --success-color: #06c270;
+    --warning-color: #ff8a00;
+    --error-color: #cd0a0a;
     
     --bg-primary: #ffffff;
-    --bg-secondary: #f7fafc;
-    --bg-overlay: rgba(255, 255, 255, 0.95);
+    --bg-secondary: #f6f6f6;
+    --bg-dark: #000000;
+    --bg-overlay: rgba(255, 255, 255, 0.98);
     
-    --text-primary: #1a202c;
-    --text-secondary: #4a5568;
-    --text-muted: #718096;
+    --text-primary: #000000;
+    --text-secondary: #545454;
+    --text-muted: #939393;
+    --text-inverse: #ffffff;
     
-    --border-color: #e2e8f0;
-    --border-radius: 12px;
-    --border-radius-sm: 8px;
-    --border-radius-lg: 16px;
+    --border-color: #e4e4e7;
+    --border-radius: 8px;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
     
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.16);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.25);
     
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 0.75rem;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
+    --spacing-4xl: 6rem;
 }
 
 /* Layout */
 #app {
     min-height: 100vh;
     position: relative;
+}
+
+/* Modern Card Component */
+.card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-md);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.card-content {
+    line-height: 1.6;
+    color: var(--text-secondary);
 }
 
 .page {
@@ -64,6 +109,20 @@ body {
     display: block;
 }
 
+/* Non-hero pages styling */
+.page:not(#landing-page) {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.page:not(#landing-page) .container {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-lg);
+    margin: var(--spacing-lg);
+    max-width: 1200px;
+}
+
 .container {
     max-width: 1000px;
     margin: 0 auto;
@@ -72,20 +131,21 @@ body {
 
 /* Typography */
 h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
     margin-bottom: var(--spacing-md);
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
 h2 {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
     margin-bottom: var(--spacing-lg);
     color: var(--text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
 }
 
 h3 {
@@ -93,6 +153,8 @@ h3 {
     font-weight: 600;
     margin-bottom: var(--spacing-md);
     color: var(--text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
 }
 
 h4 {
@@ -104,56 +166,96 @@ h4 {
 
 /* Hero Section */
 .hero {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    text-align: center;
-    color: white;
-    padding: var(--spacing-xl);
+    background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+    color: var(--text-inverse);
+    padding: var(--spacing-3xl) var(--spacing-lg);
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(6, 194, 112, 0.1) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .hero-content {
-    max-width: 600px;
+    max-width: 680px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--spacing-lg);
+    background: linear-gradient(135deg, #ffffff 0%, #06c270 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .hero-subtitle {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
     font-weight: 500;
     margin-bottom: var(--spacing-md);
-    opacity: 0.9;
+    color: #e4e4e7;
+    letter-spacing: -0.01em;
 }
 
 .hero-description {
-    font-size: 1.125rem;
-    margin-bottom: var(--spacing-2xl);
-    opacity: 0.8;
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    margin-bottom: var(--spacing-3xl);
+    color: #a1a1aa;
     line-height: 1.7;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-actions {
     display: flex;
     gap: var(--spacing-lg);
     justify-content: center;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-3xl);
     flex-wrap: wrap;
 }
 
 .race-types-preview {
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     justify-content: center;
     flex-wrap: wrap;
-    opacity: 0.7;
+    margin-top: var(--spacing-xl);
 }
 
 .race-type {
-    background: rgba(255, 255, 255, 0.2);
     padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius-lg);
     font-size: 0.875rem;
     font-weight: 500;
     backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    color: #e4e4e7;
+}
+
+.race-type:hover {
+    background: rgba(6, 194, 112, 0.1);
+    border-color: rgba(6, 194, 112, 0.3);
+    transform: translateY(-2px);
 }
 
 /* Buttons */
@@ -161,37 +263,44 @@ h4 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-size: 1rem;
-    font-weight: 600;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
     text-decoration: none;
     min-width: 140px;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: var(--shadow-sm);
+    background: var(--text-inverse);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    font-weight: 600;
 }
 
 .btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    background: #f5f5f5;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    border: 2px solid var(--border-color);
+    background: transparent;
+    color: var(--text-inverse);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 500;
 }
 
 .btn-secondary:hover {
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-1px);
 }
 
@@ -229,22 +338,32 @@ input[type="email"],
 input[type="date"],
 input[type="time"],
 input[type="number"],
+input[type="password"],
 select {
     width: 100%;
-    padding: var(--spacing-md);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    transition: all 0.3s ease;
     background: var(--bg-primary);
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
 select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
+
 
 /* Radio and Checkbox Groups */
 .radio-group,
@@ -690,27 +809,31 @@ select:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
+    background: var(--bg-primary);
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: var(--spacing-lg);
 }
 
 .auth-container {
     background: var(--bg-primary);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-2xl);
-    box-shadow: var(--shadow-lg);
-    width: 90%;
-    max-width: 400px;
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-3xl);
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-width: 480px;
     text-align: center;
+    border: 1px solid var(--border-color);
 }
 
 .auth-header h2 {
     color: var(--text-primary);
     margin-bottom: var(--spacing-sm);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 .auth-header p {
