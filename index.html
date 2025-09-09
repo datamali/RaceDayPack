@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaceDayPack - Your Race Day Preparation Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Landing Page -->
+        <section id="landing-page" class="page active">
+            <header class="hero">
+                <div class="hero-content">
+                    <h1>🏃‍♂️ RaceDayPack</h1>
+                    <p class="hero-subtitle">Your intelligent race day preparation assistant</p>
+                    <p class="hero-description">Never wonder what to wear or pack again. Get personalized recommendations based on your race type, weather conditions, and experience level.</p>
+                    
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" id="quick-start">Quick Start (2 mins)</button>
+                        <button class="btn btn-secondary" id="detailed-setup">Detailed Setup</button>
+                    </div>
+                    
+                    <div class="race-types-preview">
+                        <span class="race-type">🏃‍♀️ Running</span>
+                        <span class="race-type">🚴‍♂️ Cycling</span>
+                        <span class="race-type">🏊‍♀️ Triathlon</span>
+                        <span class="race-type">🏃‍♂️ Marathon</span>
+                    </div>
+                </div>
+            </header>
+        </section>
+
+        <!-- User Onboarding -->
+        <section id="onboarding-page" class="page">
+            <div class="container">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                
+                <div class="onboarding-step" id="step-1">
+                    <h2>Tell us about yourself</h2>
+                    <form class="onboarding-form">
+                        <div class="form-group">
+                            <label for="user-name">Name</label>
+                            <input type="text" id="user-name" placeholder="Your name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Experience Level</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="experience" value="beginner">
+                                    <span>Beginner</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="experience" value="intermediate">
+                                    <span>Intermediate</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="experience" value="advanced">
+                                    <span>Advanced</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Preferred Race Types</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" value="running">
+                                    <span>🏃‍♀️ Running</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" value="cycling">
+                                    <span>🚴‍♂️ Cycling</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" value="triathlon">
+                                    <span>🏊‍♀️ Triathlon</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" value="swimming">
+                                    <span>🏊‍♂️ Swimming</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="onboarding-navigation">
+                    <button class="btn btn-secondary" id="onboarding-back" style="display: none;">Back</button>
+                    <button class="btn btn-primary" id="onboarding-next">Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Race Setup -->
+        <section id="race-setup-page" class="page">
+            <div class="container">
+                <h2>Race Details</h2>
+                
+                <form class="race-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="race-type">Race Type</label>
+                            <select id="race-type">
+                                <option value="">Select race type</option>
+                                <option value="5k">5K Run</option>
+                                <option value="10k">10K Run</option>
+                                <option value="half-marathon">Half Marathon</option>
+                                <option value="marathon">Marathon</option>
+                                <option value="cycling-road">Road Cycling</option>
+                                <option value="cycling-mountain">Mountain Biking</option>
+                                <option value="triathlon-sprint">Sprint Triathlon</option>
+                                <option value="triathlon-olympic">Olympic Triathlon</option>
+                                <option value="triathlon-ironman">Ironman</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="race-date">Race Date</label>
+                            <input type="date" id="race-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="race-time">Start Time</label>
+                            <input type="time" id="race-time">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="race-location">Location</label>
+                            <input type="text" id="race-location" placeholder="City, State or Venue">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="terrain">Terrain</label>
+                            <select id="terrain">
+                                <option value="road">Road</option>
+                                <option value="trail">Trail</option>
+                                <option value="track">Track</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="weather-section">
+                        <h3>Weather Conditions</h3>
+                        <div id="weather-forecast" class="weather-info">
+                            <p class="weather-placeholder">Enter location and date to get weather forecast</p>
+                        </div>
+                        
+                        <div class="manual-weather">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="temperature">Expected Temperature (°F)</label>
+                                    <input type="number" id="temperature" placeholder="65">
+                                </div>
+                                <div class="form-group">
+                                    <label for="conditions">Conditions</label>
+                                    <select id="conditions">
+                                        <option value="sunny">Sunny</option>
+                                        <option value="partly-cloudy">Partly Cloudy</option>
+                                        <option value="cloudy">Cloudy</option>
+                                        <option value="light-rain">Light Rain</option>
+                                        <option value="rain">Rain</option>
+                                        <option value="windy">Windy</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="page-actions">
+                    <button class="btn btn-secondary" id="setup-back">Back</button>
+                    <button class="btn btn-primary" id="generate-recommendations">Generate Recommendations</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recommendations -->
+        <section id="recommendations-page" class="page">
+            <div class="container">
+                <div class="recommendations-header">
+                    <h2>Your Race Day Plan</h2>
+                    <div class="race-summary">
+                        <span id="summary-race-type"></span>
+                        <span id="summary-date"></span>
+                        <span id="summary-weather"></span>
+                    </div>
+                </div>
+                
+                <div class="recommendations-tabs">
+                    <button class="tab-btn active" data-tab="clothing">What to Wear</button>
+                    <button class="tab-btn" data-tab="packing">What to Pack</button>
+                    <button class="tab-btn" data-tab="timeline">Timeline</button>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- Clothing Tab -->
+                    <div id="clothing-tab" class="tab-pane active">
+                        <div class="outfit-builder">
+                            <div class="outfit-visual">
+                                <div class="outfit-display" id="outfit-display">
+                                    <!-- Visual outfit will be built here -->
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-categories">
+                                <div class="category">
+                                    <h3>Essential Gear</h3>
+                                    <div id="essential-clothing" class="clothing-items">
+                                        <!-- Essential items will be populated here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="category">
+                                    <h3>Weather-Specific</h3>
+                                    <div id="weather-clothing" class="clothing-items">
+                                        <!-- Weather-specific items will be populated here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="category">
+                                    <h3>Accessories</h3>
+                                    <div id="accessories" class="clothing-items">
+                                        <!-- Accessories will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Packing Tab -->
+                    <div id="packing-tab" class="tab-pane">
+                        <div class="packing-sections">
+                            <div class="packing-category">
+                                <h3>Pre-Race Essentials</h3>
+                                <div class="packing-checklist" id="pre-race-items">
+                                    <!-- Pre-race items will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="packing-category">
+                                <h3>During Race</h3>
+                                <div class="packing-checklist" id="during-race-items">
+                                    <!-- During race items will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="packing-category">
+                                <h3>Post-Race Recovery</h3>
+                                <div class="packing-checklist" id="post-race-items">
+                                    <!-- Post-race items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline Tab -->
+                    <div id="timeline-tab" class="tab-pane">
+                        <div class="timeline">
+                            <div class="timeline-item" data-time="7-days">
+                                <div class="timeline-marker">7d</div>
+                                <div class="timeline-content">
+                                    <h4>One Week Before</h4>
+                                    <ul id="week-before-tasks">
+                                        <li>Check weather forecast</li>
+                                        <li>Prepare and test all gear</li>
+                                        <li>Plan race day logistics</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" data-time="1-day">
+                                <div class="timeline-marker">1d</div>
+                                <div class="timeline-content">
+                                    <h4>Night Before</h4>
+                                    <ul id="night-before-tasks">
+                                        <li>Pack race day bag</li>
+                                        <li>Lay out race outfit</li>
+                                        <li>Check final weather forecast</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" data-time="race-day">
+                                <div class="timeline-marker">🏁</div>
+                                <div class="timeline-content">
+                                    <h4>Race Morning</h4>
+                                    <ul id="race-morning-tasks">
+                                        <li>Final gear check</li>
+                                        <li>Pre-race nutrition</li>
+                                        <li>Arrive at venue early</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="page-actions">
+                    <button class="btn btn-secondary" id="recommendations-back">Edit Race Details</button>
+                    <button class="btn btn-primary" id="save-plan">Save My Plan</button>
+                    <button class="btn btn-accent" id="share-plan">Share Plan</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

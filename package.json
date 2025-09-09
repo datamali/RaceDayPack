@@ -1,0 +1,42 @@
+{
+  "name": "race-day-pack",
+  "version": "1.0.0",
+  "description": "Your intelligent race day preparation assistant - never wonder what to wear or pack again",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -o",
+    "dev": "npx live-server --port=3000",
+    "build": "echo 'Build process - minify CSS/JS, optimize images' && npm run minify",
+    "minify": "echo 'Minification would happen here in production'",
+    "test": "echo 'Tests would run here'",
+    "lint": "echo 'ESLint and Prettier would run here'",
+    "deploy": "echo 'Deployment to GitHub Pages or other hosting'"
+  },
+  "keywords": [
+    "race",
+    "running",
+    "cycling",
+    "triathlon",
+    "race-day",
+    "preparation",
+    "weather",
+    "gear",
+    "packing",
+    "sports"
+  ],
+  "author": "RaceDayPack Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/race-day-pack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/race-day-pack/issues"
+  },
+  "homepage": "https://yourusername.github.io/race-day-pack"
+}
