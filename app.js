@@ -18,20 +18,37 @@ class RaceDayPack {
     }
 
     init() {
-        // Initialize Firebase authentication listener
-        if (typeof dbService !== 'undefined') {
+        this.setupEventListeners();
+        
+        // Check if Firebase is available and configured
+        if (typeof dbService !== 'undefined' && this.isFirebaseConfigured()) {
+            // Initialize Firebase authentication listener
             dbService.initAuth((user) => {
                 this.handleAuthStateChange(user);
             });
+        } else {
+            // Firebase not configured, start in offline mode
+            console.log('Firebase not configured, starting in offline mode');
+            this.isOfflineMode = true;
+            this.loadUserData();
+            this.showPage('landing-page');
         }
-        
-        this.setupEventListeners();
-        this.checkInitialAuth();
+    }
+
+    isFirebaseConfigured() {
+        // Check if Firebase config has been updated from placeholder values
+        try {
+            return typeof firebase !== 'undefined' && 
+                   firebase.apps.length > 0 &&
+                   firebase.app().options.apiKey !== "your-api-key-here";
+        } catch (error) {
+            return false;
+        }
     }
 
     checkInitialAuth() {
-        // Show auth page if user is not authenticated and not in offline mode
-        if (!this.currentUser && !this.isOfflineMode) {
+        // Show auth page if Firebase is configured and user is not authenticated
+        if (this.isFirebaseConfigured() && !this.currentUser && !this.isOfflineMode) {
             this.showPage('auth-page');
         } else {
             this.loadUserData();

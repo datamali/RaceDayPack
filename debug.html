@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Debug Test</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Firebase Configuration Test</h1>
+    <div id="results"></div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        
+        try {
+            results.innerHTML += '<p><strong>Firebase loaded:</strong> ' + (typeof firebase !== 'undefined') + '</p>';
+            
+            if (typeof firebase !== 'undefined') {
+                results.innerHTML += '<p><strong>Firebase apps:</strong> ' + firebase.apps.length + '</p>';
+                
+                if (firebase.apps.length > 0) {
+                    const config = firebase.app().options;
+                    results.innerHTML += '<p><strong>API Key:</strong> ' + config.apiKey + '</p>';
+                    results.innerHTML += '<p><strong>Project ID:</strong> ' + config.projectId + '</p>';
+                    results.innerHTML += '<p><strong>Auth Domain:</strong> ' + config.authDomain + '</p>';
+                    
+                    const isConfigured = config.apiKey !== "your-api-key-here";
+                    results.innerHTML += '<p><strong>Is Configured:</strong> ' + isConfigured + '</p>';
+                }
+            }
+            
+            results.innerHTML += '<p><strong>dbService available:</strong> ' + (typeof dbService !== 'undefined') + '</p>';
+            
+        } catch (error) {
+            results.innerHTML += '<p><strong>Error:</strong> ' + error.message + '</p>';
+        }
+    </script>
+</body>
+</html>

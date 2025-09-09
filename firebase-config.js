@@ -7,13 +7,13 @@
 // 5. Replace the config below with your project's config
 
 const firebaseConfig = {
-    // Replace these with your Firebase project configuration
-    apiKey: "your-api-key-here",
-    authDomain: "racedaypack-demo.firebaseapp.com",
-    projectId: "racedaypack-demo",
-    storageBucket: "racedaypack-demo.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyB8oA04sbikfIds5dTOKKBztTIxrt52AjI",
+  authDomain: "racedaypack-504e6.firebaseapp.com",
+  projectId: "racedaypack-504e6",
+  storageBucket: "racedaypack-504e6.firebasestorage.app",
+  messagingSenderId: "443640840395",
+  appId: "1:443640840395:web:228032e7f443af0295db4e",
+  measurementId: "G-TG4WX0MK3M"
 };
 
 // Initialize Firebase
