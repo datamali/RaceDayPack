@@ -1,6 +1,8 @@
 class RaceDayPack {
     constructor() {
         this.currentPage = 'landing-page';
+        this.currentUser = null;
+        this.isOfflineMode = false;
         this.userData = {
             name: '',
             experience: '',
@@ -9,14 +11,91 @@ class RaceDayPack {
             recommendations: {}
         };
         this.weatherData = null;
+        this.currentPlanId = null;
+        this.savedPlans = [];
         
         this.init();
     }
 
     init() {
+        // Initialize Firebase authentication listener
+        if (typeof dbService !== 'undefined') {
+            dbService.initAuth((user) => {
+                this.handleAuthStateChange(user);
+            });
+        }
+        
         this.setupEventListeners();
-        this.loadUserData();
-        this.showPage('landing-page');
+        this.checkInitialAuth();
+    }
+
+    checkInitialAuth() {
+        // Show auth page if user is not authenticated and not in offline mode
+        if (!this.currentUser && !this.isOfflineMode) {
+            this.showPage('auth-page');
+        } else {
+            this.loadUserData();
+            this.showPage('landing-page');
+        }
+    }
+
+    handleAuthStateChange(user) {
+        this.currentUser = user;
+        
+        if (user) {
+            // User is signed in
+            this.loadUserProfile();
+            if (this.currentPage === 'auth-page') {
+                this.showPage('dashboard-page');
+            }
+            this.loadSavedPlans();
+        } else {
+            // User is signed out
+            this.currentUser = null;
+            this.userData = {
+                name: '',
+                experience: '',
+                preferredRaceTypes: [],
+                raceDetails: {},
+                recommendations: {}
+            };
+            this.savedPlans = [];
+            if (!this.isOfflineMode && this.currentPage !== 'auth-page') {
+                this.showPage('auth-page');
+            }
+        }
+    }
+
+    async loadUserProfile() {
+        if (!this.currentUser || typeof dbService === 'undefined') return;
+
+        try {
+            const profile = await dbService.getUserProfile();
+            if (profile) {
+                this.userData.name = profile.displayName || this.currentUser.displayName;
+                this.userData.experience = profile.experience || '';
+                this.userData.preferredRaceTypes = profile.preferredRaceTypes || [];
+                
+                // Update UI
+                const displayNameEl = document.getElementById('user-display-name');
+                if (displayNameEl) {
+                    displayNameEl.textContent = this.userData.name || 'User';
+                }
+            }
+        } catch (error) {
+            console.log('Error loading user profile:', error);
+        }
+    }
+
+    async loadSavedPlans() {
+        if (!this.currentUser || typeof dbService === 'undefined') return;
+
+        try {
+            this.savedPlans = await dbService.getRacePlans();
+            this.renderSavedPlans();
+        } catch (error) {
+            console.log('Error loading saved plans:', error);
+        }
     }
 
     setupEventListeners() {

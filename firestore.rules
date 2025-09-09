@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Validate user document structure
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && validateUserData(request.resource.data);
+      
+      // Race plans subcollection - users can only access their own plans
+      match /racePlans/{planId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Validate race plan structure
+        allow write: if request.auth != null 
+          && request.auth.uid == userId
+          && validateRacePlanData(request.resource.data);
+      }
+    }
+    
+    // Public race plans - readable by all authenticated users
+    match /publicRacePlans/{planId} {
+      // Anyone authenticated can read public plans
+      allow read: if request.auth != null;
+      
+      // Only the owner can create/update their public plans
+      allow create, update: if request.auth != null 
+        && request.auth.uid == resource.data.ownerId
+        && validatePublicPlanData(request.resource.data);
+      
+      // Only the owner can delete their public plans
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.ownerId;
+    }
+    
+    // Validation functions
+    function validateUserData(data) {
+      return data.keys().hasAll(['displayName', 'email', 'createdAt'])
+        && data.displayName is string
+        && data.displayName.size() <= 100
+        && data.email is string
+        && data.email.matches('.*@.*\\..*')
+        && data.createdAt is timestamp
+        && (data.keys().hasAny(['experience']) ? 
+            data.experience in ['beginner', 'intermediate', 'advanced'] : true)
+        && (data.keys().hasAny(['preferredRaceTypes']) ? 
+            data.preferredRaceTypes is list && data.preferredRaceTypes.size() <= 10 : true);
+    }
+    
+    function validateRacePlanData(data) {
+      return data.keys().hasAll(['userId', 'createdAt', 'updatedAt'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && (data.keys().hasAny(['raceDetails']) ? 
+            validateRaceDetails(data.raceDetails) : true)
+        && (data.keys().hasAny(['isPublic']) ? 
+            data.isPublic is bool : true);
+    }
+    
+    function validateRaceDetails(details) {
+      return details is map
+        && (details.keys().hasAny(['raceType']) ? 
+            details.raceType is string && details.raceType.size() <= 50 : true)
+        && (details.keys().hasAny(['location']) ? 
+            details.location is string && details.location.size() <= 200 : true)
+        && (details.keys().hasAny(['temperature']) ? 
+            details.temperature is number && details.temperature >= -50 && details.temperature <= 150 : true);
+    }
+    
+    function validatePublicPlanData(data) {
+      return data.keys().hasAll(['ownerName', 'ownerId', 'sharedAt'])
+        && data.ownerName is string
+        && data.ownerName.size() <= 100
+        && data.ownerId is string
+        && data.ownerId == request.auth.uid
+        && data.sharedAt is timestamp
+        && validateRaceDetails(data.raceDetails);
+    }
+  }
+}

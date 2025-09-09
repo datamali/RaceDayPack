@@ -8,9 +8,93 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div id="app">
+        <!-- Authentication Overlay -->
+        <section id="auth-page" class="page auth-overlay" style="display: none;">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h2>🏃‍♂️ Welcome Back!</h2>
+                    <p>Sign in to access your saved race plans and preferences</p>
+                </div>
+                
+                <!-- Sign In Form -->
+                <div id="signin-form" class="auth-form active">
+                    <form id="signin">
+                        <div class="form-group">
+                            <label for="signin-email">Email</label>
+                            <input type="email" id="signin-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signin-password">Password</label>
+                            <input type="password" id="signin-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <button id="google-signin" class="btn btn-google">
+                        <span>Continue with Google</span>
+                    </button>
+                    
+                    <p class="auth-switch">
+                        Don't have an account? 
+                        <a href="#" id="show-signup">Sign up</a>
+                    </p>
+                </div>
+                
+                <!-- Sign Up Form -->
+                <div id="signup-form" class="auth-form">
+                    <form id="signup">
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-confirm">Confirm Password</label>
+                            <input type="password" id="signup-confirm" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <button id="google-signup" class="btn btn-google">
+                        <span>Sign up with Google</span>
+                    </button>
+                    
+                    <p class="auth-switch">
+                        Already have an account? 
+                        <a href="#" id="show-signin">Sign in</a>
+                    </p>
+                </div>
+                
+                <button class="btn btn-secondary auth-skip" id="continue-offline">
+                    Continue Offline
+                </button>
+            </div>
+        </section>
+
+        <div id="app">
         <!-- Landing Page -->
         <section id="landing-page" class="page active">
             <header class="hero">
@@ -312,8 +396,142 @@
                 </div>
             </div>
         </section>
+
+        <!-- User Dashboard -->
+        <section id="dashboard-page" class="page">
+            <div class="container">
+                <div class="dashboard-header">
+                    <div class="user-welcome">
+                        <h2>Welcome back, <span id="user-display-name">User</span>! 👋</h2>
+                        <p>Here are your saved race plans and account settings</p>
+                    </div>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="new-race-plan">New Race Plan</button>
+                        <button class="btn btn-secondary" id="account-settings">Settings</button>
+                        <button class="btn btn-outline" id="signout-btn">Sign Out</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" data-tab="my-plans">My Race Plans</button>
+                    <button class="tab-btn" data-tab="public-plans">Community Plans</button>
+                    <button class="tab-btn" data-tab="profile">Profile</button>
+                </div>
+
+                <!-- My Plans Tab -->
+                <div id="my-plans-tab" class="tab-pane active">
+                    <div class="plans-grid" id="saved-plans">
+                        <div class="empty-state" id="empty-plans">
+                            <div class="empty-icon">📋</div>
+                            <h3>No race plans yet</h3>
+                            <p>Create your first race plan to get personalized recommendations</p>
+                            <button class="btn btn-primary" id="create-first-plan">Create Your First Plan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Community Plans Tab -->
+                <div id="public-plans-tab" class="tab-pane">
+                    <div class="community-header">
+                        <h3>Community Race Plans</h3>
+                        <p>Get inspired by race plans shared by other athletes</p>
+                    </div>
+                    <div class="plans-grid" id="community-plans">
+                        <!-- Community plans will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profile-tab" class="tab-pane">
+                    <div class="profile-sections">
+                        <div class="profile-section">
+                            <h3>Personal Information</h3>
+                            <form id="profile-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profile-name">Display Name</label>
+                                        <input type="text" id="profile-name" placeholder="Your name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-email">Email</label>
+                                        <input type="email" id="profile-email" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Experience Level</label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="profile-experience" value="beginner">
+                                                <span>Beginner</span>
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="profile-experience" value="intermediate">
+                                                <span>Intermediate</span>
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="profile-experience" value="advanced">
+                                                <span>Advanced</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Preferred Race Types</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="profile-race-types" value="running">
+                                            <span>🏃‍♀️ Running</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="profile-race-types" value="cycling">
+                                            <span>🚴‍♂️ Cycling</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="profile-race-types" value="triathlon">
+                                            <span>🏊‍♀️ Triathlon</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="profile-race-types" value="swimming">
+                                            <span>🏊‍♂️ Swimming</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </form>
+                        </div>
+
+                        <div class="profile-section">
+                            <h3>Preferences</h3>
+                            <form id="preferences-form">
+                                <div class="form-group">
+                                    <label for="units">Measurement Units</label>
+                                    <select id="units">
+                                        <option value="imperial">Imperial (°F, miles)</option>
+                                        <option value="metric">Metric (°C, kilometers)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" id="notifications">
+                                        <span>Email notifications for race reminders</span>
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
