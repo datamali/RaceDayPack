@@ -1,3 +1,82 @@
+// APP.JS EXECUTION TEST
+console.log('=== APP.JS IS EXECUTING ===');
+console.log('Current time:', new Date().toISOString());
+
+// Toast notification system
+class ToastManager {
+    constructor() {
+        this.container = null;
+    }
+
+    init() {
+        this.container = document.getElementById('toast-container');
+        if (!this.container) {
+            this.container = document.createElement('div');
+            this.container.id = 'toast-container';
+            this.container.className = 'toast-container';
+            document.body.appendChild(this.container);
+        }
+    }
+
+    show(title, message, type = 'success', duration = 5000) {
+        if (!this.container) this.init();
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+
+        toast.innerHTML = `
+            <div class="toast-icon">${icons[type] || icons.success}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        this.container.appendChild(toast);
+
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Auto remove
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        return toast;
+    }
+
+    success(title, message, duration) {
+        return this.show(title, message, 'success', duration);
+    }
+
+    error(title, message, duration) {
+        return this.show(title, message, 'error', duration);
+    }
+
+    warning(title, message, duration) {
+        return this.show(title, message, 'warning', duration);
+    }
+
+    info(title, message, duration) {
+        return this.show(title, message, 'info', duration);
+    }
+}
+
+// Global toast instance
+const toast = new ToastManager();
+window.toastManager = toast;
+
 class RaceDayPack {
     constructor() {
         this.currentPage = 'landing-page';
@@ -18,18 +97,26 @@ class RaceDayPack {
     }
 
     init() {
+        console.log('App initializing...');
         this.setupEventListeners();
         
         // Check if Firebase is available and configured
+        console.log('dbService available:', typeof dbService !== 'undefined');
+        console.log('Firebase configured:', this.isFirebaseConfigured());
+        
         if (typeof dbService !== 'undefined' && this.isFirebaseConfigured()) {
+            console.log('Starting with Firebase authentication');
             // Show auth page immediately if Firebase is configured
             this.showPage('auth-page');
             // Initialize Firebase authentication listener
+            console.log('Setting up auth listener...');
             dbService.initAuth((user) => {
+                console.log('Auth listener triggered with user:', user);
                 this.handleAuthStateChange(user);
             });
         } else {
             // Firebase not configured, start in offline mode
+            console.log('Starting in offline mode');
             this.isOfflineMode = true;
             this.loadUserData();
             this.showPage('landing-page');
@@ -58,17 +145,36 @@ class RaceDayPack {
     }
 
     handleAuthStateChange(user) {
+        console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
+        console.log('Current page:', this.currentPage);
         this.currentUser = user;
         
         if (user) {
             // User is signed in
-            this.loadUserProfile();
-            if (this.currentPage === 'auth-page') {
-                this.showPage('dashboard-page');
+            console.log('User details:', { uid: user.uid, email: user.email, displayName: user.displayName });
+            
+            // Always show dashboard when user is signed in, regardless of current page
+            console.log('User signed in, showing dashboard');
+            console.log('About to call showPage dashboard-page');
+            this.showPage('dashboard-page');
+            console.log('showPage dashboard-page completed');
+            
+            // Update user profile
+            try {
+                const displayNameEl = document.getElementById('user-display-name');
+                if (displayNameEl) {
+                    displayNameEl.textContent = user.displayName || user.email || 'User';
+                }
+            } catch (error) {
+                console.error('Error updating display name:', error);
             }
+            
+            // Load user data
+            this.loadUserProfile();
             this.loadSavedPlans();
         } else {
             // User is signed out
+            console.log('User signed out, clearing data');
             this.currentUser = null;
             this.userData = {
                 name: '',
@@ -78,7 +184,8 @@ class RaceDayPack {
                 recommendations: {}
             };
             this.savedPlans = [];
-            if (!this.isOfflineMode && this.currentPage !== 'auth-page') {
+            if (!this.isOfflineMode) {
+                console.log('Redirecting to auth page');
                 this.showPage('auth-page');
             }
         }
@@ -116,28 +223,112 @@ class RaceDayPack {
         }
     }
 
-    setupAuthEventListeners() {
-        console.log('Setting up auth event listeners');
-        // Sign in form
-        const signinForm = document.getElementById('signin');
-        if (signinForm) {
-            console.log('Found signin form, adding listener');
-            signinForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleSignIn();
-            });
+    renderSavedPlans() {
+        const savedPlansContainer = document.getElementById('saved-plans');
+        const emptyState = document.getElementById('empty-plans');
+        
+        if (!savedPlansContainer) return;
+
+        if (!this.savedPlans || this.savedPlans.length === 0) {
+            // Show empty state
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+            savedPlansContainer.innerHTML = emptyState ? emptyState.outerHTML : `
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>No race plans yet</h3>
+                    <p>Create your first race plan to get personalized recommendations</p>
+                    <button class="btn btn-primary" id="create-first-plan">Create Your First Plan</button>
+                </div>
+            `;
         } else {
-            console.log('Signin form not found');
+            // Show saved plans
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            savedPlansContainer.innerHTML = this.savedPlans.map(plan => `
+                <div class="plan-card" data-plan-id="${plan.id}">
+                    <div class="plan-header">
+                        <h3>${plan.raceDetails?.raceType || 'Race Plan'}</h3>
+                        <span class="plan-date">${plan.raceDetails?.raceDate || ''}</span>
+                    </div>
+                    <div class="plan-details">
+                        <p><strong>Location:</strong> ${plan.raceDetails?.location || 'Not specified'}</p>
+                        <p><strong>Temperature:</strong> ${plan.raceDetails?.temperature || 'Not specified'}°F</p>
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn btn-primary btn-sm" onclick="raceDayPack.viewPlan('${plan.id}')">View</button>
+                        <button class="btn btn-secondary btn-sm" onclick="raceDayPack.deletePlan('${plan.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
         }
+        
+        // Re-setup event listeners for new buttons
+        this.setupDashboardEventListeners();
+    }
+
+    setupAuthEventListeners() {
+        console.log('=== SETTING UP AUTH EVENT LISTENERS ===');
+        console.log('Document ready state:', document.readyState);
+        
+        // Wait a bit and try multiple times if needed
+        const trySetupListeners = (attempt = 1) => {
+            console.log(`Setup attempt #${attempt}`);
+            
+            // Sign in form
+            const signinForm = document.getElementById('signin');
+            console.log('Signin form element:', signinForm);
+            console.log('Signin form parent visible?', signinForm?.offsetParent !== null);
+            
+            if (signinForm) {
+                console.log('Found signin form, adding listener');
+                signinForm.addEventListener('submit', (e) => {
+                    console.log('SIGNIN FORM SUBMIT EVENT TRIGGERED');
+                    e.preventDefault();
+                    this.handleSignIn();
+                });
+                
+                // Also add click listener to submit button
+                const submitBtn = signinForm.querySelector('button[type="submit"]');
+                console.log('Submit button found:', !!submitBtn);
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', (e) => {
+                        console.log('Sign in submit button clicked');
+                        // Don't prevent default here - let form submit
+                    });
+                }
+            } else {
+                console.log('Signin form not found');
+                if (attempt < 3) {
+                    setTimeout(() => trySetupListeners(attempt + 1), 500);
+                    return;
+                }
+            }
+        };
+        
+        trySetupListeners();
 
         // Sign up form
         const signupForm = document.getElementById('signup');
+        console.log('Signup form element:', signupForm);
         if (signupForm) {
             console.log('Found signup form, adding listener');
             signupForm.addEventListener('submit', (e) => {
+                console.log('SIGNUP FORM SUBMIT EVENT TRIGGERED');
                 e.preventDefault();
                 this.handleSignUp();
             });
+            
+            // Also add click listener to submit button
+            const submitBtn = signupForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', () => {
+                    console.log('Sign up submit button clicked');
+                });
+            }
         } else {
             console.log('Signup form not found');
         }
@@ -173,6 +364,49 @@ class RaceDayPack {
             showSigninLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.switchAuthForm('signin');
+            });
+        }
+    }
+
+    setupDashboardEventListeners() {
+        // Sign out button
+        const signoutBtn = document.getElementById('signout-btn');
+        if (signoutBtn) {
+            signoutBtn.addEventListener('click', async () => {
+                try {
+                    if (typeof dbService !== 'undefined') {
+                        await dbService.signOut();
+                        toast.success('Signed Out', 'You have been signed out successfully');
+                    }
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    toast.error('Sign Out Error', 'Failed to sign out');
+                }
+            });
+        }
+
+        // New race plan button
+        const newRacePlanBtn = document.getElementById('new-race-plan');
+        if (newRacePlanBtn) {
+            newRacePlanBtn.addEventListener('click', () => {
+                this.showPage('onboarding-page');
+            });
+        }
+
+        // Create first plan button
+        const createFirstPlanBtn = document.getElementById('create-first-plan');
+        if (createFirstPlanBtn) {
+            createFirstPlanBtn.addEventListener('click', () => {
+                this.showPage('onboarding-page');
+            });
+        }
+
+        // Account settings button
+        const accountSettingsBtn = document.getElementById('account-settings');
+        if (accountSettingsBtn) {
+            accountSettingsBtn.addEventListener('click', () => {
+                // Switch to profile tab in dashboard
+                this.switchTab('profile');
             });
         }
     }
@@ -236,9 +470,13 @@ class RaceDayPack {
                 this.switchTab(e.target.dataset.tab);
             });
         });
+
+        // Dashboard event listeners
+        this.setupDashboardEventListeners();
     }
 
     showPage(pageId) {
+        console.log('Attempting to show page:', pageId);
         // Hide all pages
         document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active');
@@ -249,6 +487,9 @@ class RaceDayPack {
         if (targetPage) {
             targetPage.classList.add('active');
             this.currentPage = pageId;
+            console.log('Successfully showed page:', pageId);
+        } else {
+            console.error('Page not found:', pageId);
         }
     }
 
@@ -723,29 +964,114 @@ class RaceDayPack {
         }
     }
 
+    // Test method for debugging
+    testDashboard() {
+        console.log('Testing dashboard redirect...');
+        this.currentUser = { uid: 'test', email: 'test@test.com', displayName: 'Test User' };
+        this.showPage('dashboard-page');
+        this.loadUserProfile();
+        console.log('Dashboard test complete');
+    }
+
+    // Dashboard methods
+    async viewPlan(planId) {
+        console.log('Viewing plan:', planId);
+        this.currentPlanId = planId;
+        // Load the plan and show recommendations page
+        const plan = this.savedPlans.find(p => p.id === planId);
+        if (plan) {
+            this.userData = { ...this.userData, ...plan };
+            this.showPage('recommendations-page');
+        }
+    }
+
+    async deletePlan(planId) {
+        if (!confirm('Are you sure you want to delete this race plan?')) return;
+        
+        try {
+            if (typeof dbService !== 'undefined') {
+                await dbService.deleteRacePlan(planId);
+                toast.success('Plan Deleted', 'Race plan has been deleted successfully');
+                // Reload saved plans
+                await this.loadSavedPlans();
+            }
+        } catch (error) {
+            console.error('Error deleting plan:', error);
+            toast.error('Delete Failed', 'Failed to delete the race plan');
+        }
+    }
+
+    switchTab(tabName) {
+        console.log('Switching to tab:', tabName);
+        // Remove active class from all tabs and panes
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        
+        // Add active class to selected tab and pane
+        const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        const tabPane = document.getElementById(`${tabName}-tab`);
+        
+        if (tabBtn) tabBtn.classList.add('active');
+        if (tabPane) tabPane.classList.add('active');
+    }
+
     // Authentication methods
     async handleSignIn() {
+        console.log('=== HandleSignIn called ===');
         if (typeof dbService === 'undefined') {
-            alert('Authentication service not available');
+            toast.error('Service Error', 'Authentication service not available');
             return;
         }
 
         const email = document.getElementById('signin-email').value;
         const password = document.getElementById('signin-password').value;
 
+        console.log('Sign in attempt:', { email, password: '***' });
+
+        if (!email || !password) {
+            toast.warning('Missing Information', 'Please enter both email and password');
+            return;
+        }
+
         try {
-            await dbService.signIn(email, password);
-            // handleAuthStateChange will be called automatically
+            console.log('Calling dbService.signIn...');
+            const result = await dbService.signIn(email, password);
+            console.log('SignIn result:', result);
+            toast.success('Welcome Back!', 'Successfully signed in to your account');
+            
+            // Manual check for auth state change in case it's not automatic
+            setTimeout(() => {
+                console.log('Checking current user after signin:', this.currentUser);
+                if (this.currentUser) {
+                    console.log('User is signed in, manually redirecting to dashboard');
+                    this.showPage('dashboard-page');
+                }
+            }, 1000);
         } catch (error) {
             console.error('Sign in error:', error);
-            alert('Sign in failed: ' + error.message);
+            let errorMessage = 'Sign in failed';
+            
+            // Handle specific Firebase error codes
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = 'No account found with this email address';
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = 'Incorrect password';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorMessage = 'Too many failed attempts. Please try again later';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            toast.error('Sign In Failed', errorMessage);
         }
     }
 
     async handleSignUp() {
-        console.log('HandleSignUp called');
+        console.log('=== HandleSignUp called ===');
         if (typeof dbService === 'undefined') {
-            alert('Authentication service not available');
+            toast.error('Service Error', 'Authentication service not available');
             return;
         }
 
@@ -756,53 +1082,142 @@ class RaceDayPack {
 
         console.log('Signup data:', { name, email, password: '***' });
 
+        // Validation
+        if (!name || !email || !password || !confirmPassword) {
+            toast.warning('Missing Information', 'Please fill in all fields');
+            return;
+        }
+
         if (password !== confirmPassword) {
-            alert('Passwords do not match');
+            toast.warning('Password Mismatch', 'Passwords do not match');
             return;
         }
 
         if (password.length < 6) {
-            alert('Password must be at least 6 characters');
+            toast.warning('Weak Password', 'Password must be at least 6 characters');
             return;
         }
 
         try {
             await dbService.signUp(email, password, name);
+            toast.success('Account Created!', 'Welcome to RaceDayPack! Your account has been created successfully.');
             // handleAuthStateChange will be called automatically
         } catch (error) {
             console.error('Sign up error:', error);
-            alert('Sign up failed: ' + error.message);
+            let errorMessage = 'Account creation failed';
+            
+            // Handle specific Firebase error codes
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = 'An account with this email already exists';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = 'Password is too weak';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            toast.error('Sign Up Failed', errorMessage);
         }
     }
 
     async handleGoogleSignIn() {
         if (typeof dbService === 'undefined') {
-            alert('Authentication service not available');
+            toast.error('Service Error', 'Authentication service not available');
             return;
         }
 
         try {
             await dbService.signInWithGoogle();
+            toast.success('Welcome!', 'Successfully signed in with Google');
             // handleAuthStateChange will be called automatically
         } catch (error) {
             console.error('Google sign in error:', error);
-            alert('Google sign in failed: ' + error.message);
+            let errorMessage = 'Google sign in failed';
+            
+            if (error.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Sign in was cancelled';
+            } else if (error.code === 'auth/popup-blocked') {
+                errorMessage = 'Pop-up was blocked by browser';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            toast.error('Google Sign In Failed', errorMessage);
         }
     }
 
     switchAuthForm(formType) {
+        console.log('Switching auth form to:', formType);
+        console.log('Switching to: ' + formType);
         const signinForm = document.getElementById('signin-form');
         const signupForm = document.getElementById('signup-form');
+
+        console.log('Signin form found:', !!signinForm);
+        console.log('Signup form found:', !!signupForm);
 
         if (formType === 'signup') {
             signinForm.classList.remove('active');
             signupForm.classList.add('active');
+            console.log('Switched to signup form');
         } else {
             signupForm.classList.remove('active');
             signinForm.classList.add('active');
+            console.log('Switched to signin form');
         }
     }
 }
 
-// Initialize the app
-const raceDayPack = new RaceDayPack();
+// Debug Firebase availability
+window.addEventListener('load', function() {
+    console.log('=== FIREBASE DEBUG ===');
+    console.log('Firebase available:', typeof firebase !== 'undefined');
+    console.log('Firebase auth:', typeof firebase?.auth !== 'undefined');
+    console.log('Firebase firestore:', typeof firebase?.firestore !== 'undefined');
+    console.log('dbService available:', typeof dbService !== 'undefined');
+    console.log('=== END FIREBASE DEBUG ===');
+});
+
+// Initialize the app after DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing app');
+    console.log('Available elements:', {
+        signinForm: document.getElementById('signin'),
+        signupForm: document.getElementById('signup'),
+        authPage: document.getElementById('auth-page')
+    });
+    
+    // Check if Firebase is ready
+    if (typeof firebase === 'undefined') {
+        console.error('Firebase not loaded!');
+        alert('Firebase not loaded! Check the script tags.');
+        return;
+    }
+    
+    if (typeof dbService === 'undefined') {
+        console.error('dbService not available!');
+        alert('dbService not available! Check firebase-config.js');
+        return;
+    }
+    
+    try {
+        window.raceDayPack = new RaceDayPack();
+        console.log('RaceDayPack created successfully');
+        
+        // Test if we can manually trigger form detection
+        setTimeout(() => {
+            console.log('Delayed form check:', {
+                signinForm: document.getElementById('signin'),
+                signupForm: document.getElementById('signup'),
+                isAuthPageVisible: document.getElementById('auth-page').style.display !== 'none'
+            });
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error creating RaceDayPack:', error);
+        alert('Error creating RaceDayPack: ' + error.message);
+        if (window.toastManager) {
+            window.toastManager.show('Initialization Error', 'Failed to initialize the app. Please refresh the page.', 'error');
+        }
+    }
+});

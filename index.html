@@ -16,6 +16,9 @@
 </head>
 <body>
     <div id="app">
+        <!-- Toast Container -->
+        <div id="toast-container" class="toast-container"></div>
+        
         <!-- Authentication Overlay -->
         <section id="auth-page" class="page auth-overlay">
             <div class="auth-container">
@@ -86,6 +89,14 @@
                         Already have an account? 
                         <a href="#" id="show-signin">Sign in</a>
                     </p>
+                    
+                    <!-- Debug buttons to test JavaScript -->
+                    <div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border: 2px solid #ccc;">
+                        <p><strong>DEBUG PANEL:</strong></p>
+                        <button onclick="alert('JavaScript is working!'); console.log('Test button clicked');" style="margin: 5px; background: red; color: white; padding: 5px;">Test JS</button>
+                        <button onclick="console.log('Forms:', {signin: document.getElementById('signin'), signup: document.getElementById('signup')}); alert('Check console for form debug info');" style="margin: 5px; background: blue; color: white; padding: 5px;">Test Forms</button>
+                        <button onclick="window.raceDayPack?.handleSignIn(); alert('Manually called handleSignIn');" style="margin: 5px; background: green; color: white; padding: 5px;">Manual SignIn</button>
+                    </div>
                 </div>
                 
                 <button class="btn btn-secondary auth-skip" id="continue-offline">
